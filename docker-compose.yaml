@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  vernemq:
+    image: vernemq/vernemq:2.0.1-alpine
+    container_name: vernemq
+    restart: unless-stopped
+    ports:
+      - "1883:1883"   # MQTT Port
+      - "8888:8888"   # WebSocket Port (optional)
+      - "8080:8080"   # HTTP API (optional)
+    environment:
+      - DOCKER_VERNEMQ_ACCEPT_EULA=yes
+      - DOCKER_VERNEMQ_ALLOW_ANONYMOUS=off
+      - DOCKER_VERNEMQ_LOG__CONSOLE=console
+      - DOCKER_VERNEMQ_LOG__CONSOLE__LEVEL=debug
+      - DOCKER_VERNEMQ_DISCOVERY_NODE=off
+      - DOCKER_VERNEMQ_PLUGINS__VMQ_DIVERSITY=off
+      - DOCKER_VERNEMQ_PLUGINS__VMQ_PASSWD=off
+      - DOCKER_VERNEMQ_PLUGINS__VMQ_ACL=off
+      - DOCKER_VERNEMQ_PLUGINS__VMQ_WEBHOOKS=on
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__MYWEBHOOK1__HOOK=auth_on_register
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__MYWEBHOOK1__ENDPOINT=http://5680264194a7.ngrok-free.app/api/v1/auth/register
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__MYWEBHOOK2__HOOK=auth_on_subscribe
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__MYWEBHOOK2__ENDPOINT=http://5680264194a7.ngrok-free.app/api/v1/auth/subscribe
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__MYWEBHOOK3__HOOK=auth_on_publish
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__MYWEBHOOK3__ENDPOINT=http://5680264194a7.ngrok-free.app/api/v1/auth/publish
+    volumes:
+      - ./vernemq/data:/vernemq/data
+      - ./vernemq/log:/vernemq/log
