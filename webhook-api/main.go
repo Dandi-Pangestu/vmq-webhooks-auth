@@ -211,10 +211,30 @@ func validateJWT(tokenString string) (*CustomClaims, error) {
 	return nil, fmt.Errorf("token claims are invalid or token is not valid")
 }
 
+// Extract actual topic from shared subscription pattern
+func extractTopicFromSharedSubscription(topic string) string {
+	// Check if this is a shared subscription ($share/groupname/actualtopic)
+	if strings.HasPrefix(topic, "$share/") {
+		parts := strings.SplitN(topic, "/", 3)
+		if len(parts) >= 3 {
+			// Return the actual topic part (everything after $share/groupname/)
+			return parts[2]
+		}
+	}
+	// Return original topic if not a shared subscription
+	return topic
+}
+
 // Check if topic matches any pattern in ACL using wildcard matching
 func matchesACL(topic string, acl []string) bool {
+	// Extract actual topic from shared subscription if needed
+	actualTopic := extractTopicFromSharedSubscription(topic)
+
 	for _, pattern := range acl {
-		if matchTopic(topic, pattern) {
+		// Also check if ACL pattern is a shared subscription pattern
+		actualPattern := extractTopicFromSharedSubscription(pattern)
+
+		if matchTopic(actualTopic, actualPattern) {
 			return true
 		}
 	}
